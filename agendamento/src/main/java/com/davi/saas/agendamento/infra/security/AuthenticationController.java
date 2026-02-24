@@ -1,6 +1,7 @@
 package com.davi.saas.agendamento.infra.security;
 
 
+import com.davi.saas.agendamento.auth.LoginResponseDTO;
 import com.davi.saas.agendamento.auth.User;
 import com.davi.saas.agendamento.auth.UserRepository;
 import jakarta.validation.Valid;
@@ -24,12 +25,18 @@ public class AuthenticationController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data){
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(),data.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
         System.out.printf("oi");
-        return ResponseEntity.ok().build();
+
+        var token = tokenService.generateToken((User) auth.getPrincipal());
+
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     @PostMapping("/register")
